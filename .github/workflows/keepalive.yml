@@ -3,12 +3,17 @@ name: 🔄 保持在线
 on:
   schedule:
     - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping 伟一农场
+      - name: Ping 伟一农场 (Koyeb)
+        run: |
+          curl -s -o /dev/null -w "HTTP %{http_code}" https://weiyi-farm-ch-tape.koyeb.app/
+          echo " ✅ 已唤醒"
+      - name: Ping 备用 (Render)
         run: |
           curl -s -o /dev/null -w "HTTP %{http_code}" https://weiyi-farm.onrender.com/
-          echo " ✅ 已唤醒"
+          echo " ✅"
