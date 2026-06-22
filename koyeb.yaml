@@ -1,0 +1,10 @@
+name: weiyi-farm
+service:
+  name: weiyi-farm
+  type: web
+  runtime: python
+  build_command: pip install -r requirements.txt
+  start_command: gunicorn server:app --bind 0.0.0.0:$PORT --workers 1
+  env:
+    - key: PORT
+      value: "8000"
