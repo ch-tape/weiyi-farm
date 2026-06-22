@@ -1,0 +1,14 @@
+name: 🔄 保持在线
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping 伟一农场
+        run: |
+          curl -s -o /dev/null -w "HTTP %{http_code}" https://weiyi-farm.onrender.com/
+          echo " ✅ 已唤醒"
