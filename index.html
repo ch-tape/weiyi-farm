@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥬 伟一农场 - 伟一农场</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(180deg,#87CEEB 0%,#98FB98 60%,#8B4513 60%,#654321 100%);min-height:100vh;color:#333}
+.container{max-width:900px;margin:0 auto;padding:10px}
+
+/* 顶部导航 */
+.topbar{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.92);padding:10px 18px;border-radius:14px;margin:10px 0;box-shadow:0 2px 12px rgba(0,0,0,.1);flex-wrap:wrap;gap:8px}
+.topbar .title{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.topbar .user-info{display:flex;align-items:center;gap:16px;font-size:15px}
+.coins{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff;padding:6px 14px;border-radius:20px;font-weight:700;font-size:16px}
+.btn{padding:8px 16px;border:none;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-primary{background:#4CAF50;color:#fff}
+.btn-primary:hover{background:#388E3C}
+.btn-warn{background:#FF9800;color:#fff}
+.btn-warn:hover{background:#F57C00}
+.btn-danger{background:#f44336;color:#fff}
+.btn-danger:hover{background:#d32f2f}
+.btn-outline{background:transparent;border:2px solid #4CAF50;color:#4CAF50}
+.btn-outline:hover{background:#4CAF50;color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* 主区域 */
+.main{display:flex;gap:12px;flex-wrap:wrap}
+.farm-area{flex:1;min-width:500px}
+
+/* 农场 */
+.farm{background:rgba(255,255,255,.9);border-radius:16px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.12);min-height:400px}
+.farm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.farm-header h3{font-size:18px;display:flex;align-items:center;gap:6px}
+.plots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.plot{aspect-ratio:1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;min-height:120px}
+.plot:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.plot.empty{background:linear-gradient(135deg,#d4a76a,#c4945a);border:2px dashed #a07840}
+.plot.empty:hover{background:linear-gradient(135deg,#e0b880,#d4a76a)}
+.plot.growing{background:linear-gradient(135deg,#aed581,#8bc34a);border:2px solid #689f38}
+.plot.ready{background:linear-gradient(135deg,#fff176,#ffd54f);border:2px solid #f9a825;animation:pulse 1s infinite}
+.plot .crop-icon{font-size:40px;margin-bottom:4px}
+.plot .crop-name{font-size:13px;font-weight:600}
+.plot .progress-bar{width:80%;height:8px;background:rgba(0,0,0,.15);border-radius:4px;margin-top:6px;overflow:hidden}
+.plot .progress-fill{height:100%;background:#4CAF50;border-radius:4px;transition:width 2s linear}
+.plot .progress-fill.ready{background:#FF9800}
+.plot .watered{position:absolute;top:4px;right:4px;font-size:14px}
+
+@keyframes pulse{0%,100%{box-shadow:0 0 10px #FFD700}50%{box-shadow:0 0 24px #FF9800}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* 侧边栏 */
+.sidebar{width:280px;display:flex;flex-direction:column;gap:12px}
+.card{background:rgba(255,255,255,.9);border-radius:14px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.card h4{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rank-list{list-style:none}
+.rank-list li{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #eee;font-size:14px}
+.rank-list li:last-child{border-bottom:none}
+.rank-list .rank-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;margin-right:8px}
+.rank-1{background:#FFD700}
+.rank-2{background:#C0C0C0}
+.rank-3{background:#CD7F32}
+.rank-other{background:#999}
+.rank-bar{display:flex;align-items:center;gap:8px}
+
+/* 商店 */
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.shop-item{background:#f5f5f5;border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.shop-item:hover{background:#e8f5e9;border-color:#4CAF50}
+.shop-item .shop-icon{font-size:32px}
+.shop-item .shop-name{font-size:13px;font-weight:600;margin:4px 0}
+.shop-item .shop-info{font-size:11px;color:#888}
+.shop-item .shop-price{font-size:14px;color:#4CAF50;font-weight:700}
+
+/* 模态框 */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:100;justify-content:center;align-items:center}
+.modal.show{display:flex}
+.modal-content{background:#fff;border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-content h3{margin-bottom:16px;font-size:20px}
+.input-group{margin-bottom:14px}
+.input-group label{display:block;font-size:13px;color:#666;margin-bottom:4px}
+.input-group input,.input-group select{width:100%;padding:10px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;outline:none;transition:.2s}
+.input-group input:focus,.input-group select:focus{border-color:#4CAF50}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+/* 消息提示 */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:24px;font-size:15px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{background:#4CAF50}
+.toast.error{background:#f44336}
+
+/* 响应式 */
+@media(max-width:768px){
+  .main{flex-direction:column}
+  .farm-area{min-width:auto}
+  .sidebar{width:100%}
+  .plots-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <!-- 登录/注册页 -->
+  <div id="loginPage" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:80px">🥬</div>
+      <h1 style="font-size:32px;color:#fff;text-shadow:2px 2px 4px rgba(0,0,0,.3)">伟一农场</h1>
+      <p style="color:#fff;opacity:.9;margin-top:8px">伟一同事专属菜园 🚀</p>
+    </div>
+    <div class="card" style="width:340px;padding:24px">
+      <div id="loginForm">
+        <div class="input-group"><label>用户名</label><input id="loginUser" placeholder="输入用户名" autocomplete="off"></div>
+        <div class="input-group"><label>密码</label><input id="loginPass" type="password" placeholder="输入密码"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="doLogin()" style="flex:1">登录</button>
+          <button class="btn btn-outline" onclick="doRegister()" style="flex:1">注册</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 游戏主页 -->
+  <div id="gamePage" style="display:none">
+    <!-- 顶部导航 -->
+    <div class="topbar">
+      <div class="title">🥬 伟一农场</div>
+      <div class="user-info">
+        <span>👤 <b id="myName"></b></span>
+        <span class="coins" id="myCoins">💰 100</span>
+        <button class="btn btn-sm btn-outline" onclick="refreshFarm()">🔄 刷新</button>
+        <button class="btn btn-sm btn-danger" onclick="logout()">退出</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- 农场区域 -->
+      <div class="farm-area">
+        <!-- 好友选择 -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="friendTabs"></div>
+        <div class="farm">
+          <div class="farm-header">
+            <h3>🏡 <span id="farmOwner">我的农场</span></h3>
+            <span id="farmCoins" style="color:#F57C00;font-weight:600"></span>
+          </div>
+          <div class="plots-grid" id="plotsGrid"></div>
+        </div>
+      </div>
+
+      <!-- 侧边栏 -->
+      <div class="sidebar">
+        <!-- 排行榜 -->
+        <div class="card">
+          <h4>🏆 菜园富豪榜</h4>
+          <ul class="rank-list" id="rankList"></ul>
+        </div>
+        <!-- 商店 -->
+        <div class="card">
+          <h4>🛒 种子商店</h4>
+          <div class="shop-grid" id="shopGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== 全局状态 ====================
+let ME = null;           // 当前用户
+let CROPS = {};          // 作物配置
+let currentFarmUserId = null;  // 当前查看的农场
+let users = [];          // 用户列表
+
+// ==================== API ====================
+const API = '/api';
+
+async function api(url, body) {
+  try {
+    const res = await fetch(API + url, {
+      method: body ? 'POST' : 'GET',
+      headers: body ? {'Content-Type':'application/json'} : {},
+      body: body ? JSON.stringify(body) : undefined
+    });
+    return await res.json();
+  } catch(e) {
+    return {ok:false, msg:'网络错误，请检查服务器'};
+  }
+}
+
+// ==================== UI 工具 ====================
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.className = 'toast', 2000);
+}
+
+function showPage(name) {
+  document.getElementById('loginPage').style.display = name==='login' ? 'flex' : 'none';
+  document.getElementById('gamePage').style.display = name==='game' ? 'block' : 'none';
+}
+
+// ==================== 登录/注册 ====================
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) return toast('请填写用户名和密码', 'error');
+  const res = await api('/login', {username:u, password:p});
+  if (res.ok) {
+    ME = res.user;
+    CROPS = res.crops;
+    localStorage.setItem('farm_user', JSON.stringify({id:ME.id, username:ME.username}));
+    currentFarmUserId = ME.id;
+    showPage('game');
+    initGame();
+    toast(`欢迎回来，${ME.username}！`, 'success');
+  } else {
+    toast(res.msg, 'error');
+  }
+}
+
+async function doRegister() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) return toast('请填写用户名和密码', 'error');
+  const res = await api('/register', {username:u, password:p});
+  if (res.ok) {
+    toast('注册成功！请登录', 'success');
+  } else {
+    toast(res.msg, 'error');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('farm_user');
+  ME = null;
+  showPage('login');
+}
+
+// ==================== 游戏初始化 ====================
+async function initGame() {
+  document.getElementById('myName').textContent = ME.username;
+  await loadUsers();
+  renderShop();
+  renderFriendTabs();
+  await refreshFarm();
+  await loadRank();
+  // 自动刷新
+  setInterval(refreshFarm, 10000);
+  setInterval(loadRank, 15000);
+}
+
+async function loadUsers() {
+  const res = await api('/users');
+  if (res.ok) users = res.users;
+}
+
+// ==================== 好友切换 ====================
+function renderFriendTabs() {
+  const container = document.getElementById('friendTabs');
+  container.innerHTML = users.map(u => {
+    const active = u.id === currentFarmUserId ? 'btn-primary' : 'btn-outline';
+    return `<button class="btn btn-sm ${active}" onclick="switchFarm(${u.id})">
+      ${u.id===ME.id ? '🏡 我的' : '👤 '+u.username}
+    </button>`;
+  }).join('');
+}
+
+async function switchFarm(uid) {
+  currentFarmUserId = uid;
+  renderFriendTabs();
+  await refreshFarm();
+}
+
+// ==================== 农场渲染 ====================
+async function refreshFarm() {
+  if (!currentFarmUserId) return;
+  const res = await api('/farm/' + currentFarmUserId);
+  if (!res.ok) return;
+  
+  const owner = users.find(u => u.id === currentFarmUserId);
+  document.getElementById('farmOwner').textContent = 
+    currentFarmUserId === ME.id ? '我的农场' : `${owner?.username||'?'} 的农场`;
+  document.getElementById('farmCoins').textContent = 
+    currentFarmUserId === ME.id ? `💰 ${ME.coins}` : '';
+  
+  renderPlots(res.plots);
+  
+  // 更新我的金币
+  if (currentFarmUserId === ME.id) {
+    const myData = users.find(u => u.id === ME.id);
+    if (myData) {
+      ME.coins = myData.coins;
+      document.getElementById('myCoins').textContent = `💰 ${ME.coins}`;
+    }
+  }
+}
+
+function renderPlots(plots) {
+  const grid = document.getElementById('plotsGrid');
+  grid.innerHTML = plots.map((p,i) => {
+    const isMine = currentFarmUserId === ME.id;
+    let cropIcon = '🟫', cropName = '空地', cls = 'empty', extra = '', action = '';
+    
+    if (p.state === 'growing') {
+      const crop = CROPS[p.crop_type];
+      cropIcon = crop?.icon || '🌱';
+      cropName = crop?.name || '生长中';
+      cls = 'growing';
+      extra = `<div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%"></div></div>`;
+      if (isMine) {
+        action = p.watered ? '' : ` onclick="waterPlot(${i})" title="浇水"`;
+      }
+    } else if (p.state === 'ready') {
+      const crop = CROPS[p.crop_type];
+      cropIcon = crop?.icon || '🌾';
+      cropName = crop?.name || '成熟';
+      cls = 'ready';
+      if (isMine) {
+        action = ` onclick="harvestPlot(${i})" title="收获"`;
+      } else {
+        action = ` onclick="stealPlot(${i})" title="偷菜！"`;
+      }
+    } else if (isMine) {
+      action = ` onclick="openPlant(${i})" title="种植"`;
+      cropIcon = '➕';
+      cropName = '种植';
+    }
+    
+    return `<div class="plot ${cls}"${action}>
+      ${p.watered ? '<span class="watered">💧</span>' : ''}
+      <span class="crop-icon">${cropIcon}</span>
+      <span class="crop-name">${cropName}</span>
+      ${extra}
+    </div>`;
+  }).join('');
+}
+
+// ==================== 种植 ====================
+let plantPlotIndex = null;
+function openPlant(idx) {
+  plantPlotIndex = idx;
+  const grid = document.getElementById('plotsGrid');
+  // 显示作物选择浮层
+  const items = Object.entries(CROPS).map(([k,v]) => `
+    <div class="shop-item" onclick="doPlant('${k}')">
+      <div class="shop-icon">${v.icon}</div>
+      <div class="shop-name">${v.name}</div>
+      <div class="shop-info">${v.grow}秒成熟</div>
+      <div class="shop-price">💰${v.price}</div>
+    </div>
+  `).join('');
+  
+  // 简单实现：重用商店逻辑，用 toast 提示
+  // 替代方案：在 plotsGrid 上显示选择
+  showPlantDialog(idx);
+}
+
+function showPlantDialog(idx) {
+  const items = Object.entries(CROPS).map(([k,v]) => `
+    <button class="btn btn-outline" onclick="doPlant('${k}')" style="margin:4px">
+      ${v.icon} ${v.name} 💰${v.price}
+    </button>
+  `).join('');
+  
+  const msg = `<div style="text-align:center"><p style="margin-bottom:12px">选择要种植的作物：</p>${items}</div>`;
+  // 把选择面板放在 grid 上方
+  const grid = document.getElementById('plotsGrid');
+  const div = document.createElement('div');
+  div.id = 'plantDialog';
+  div.style.cssText = 'text-align:center;padding:12px;background:#fff;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)';
+  div.innerHTML = msg;
+  grid.parentNode.insertBefore(div, grid);
+  plantPlotIndex = idx;
+}
+
+async function doPlant(cropType) {
+  const dialog = document.getElementById('plantDialog');
+  if (dialog) dialog.remove();
+  const res = await api('/plant', {user_id:ME.id, plot_index:plantPlotIndex, crop_type:cropType});
+  toast(res.msg, res.ok?'success':'error');
+  if (res.ok) { ME.coins = res.coins; document.getElementById('myCoins').textContent = `💰 ${ME.coins}`; }
+  await loadUsers();
+  await refreshFarm();
+}
+
+// ==================== 浇水 ====================
+async function waterPlot(idx) {
+  const res = await api('/water', {user_id:ME.id, plot_index:idx});
+  toast(res.msg, res.ok?'success':'error');
+  await refreshFarm();
+}
+
+// ==================== 收获 ====================
+async function harvestPlot(idx) {
+  const res = await api('/harvest', {user_id:ME.id, plot_index:idx});
+  toast(res.msg, res.ok?'success':'error');
+  if (res.ok) { ME.coins = res.coins; document.getElementById('myCoins').textContent = `💰 ${ME.coins}`; }
+  await loadUsers();
+  await refreshFarm();
+  await loadRank();
+}
+
+// ==================== 偷菜 ====================
+async function stealPlot(idx) {
+  const res = await api('/steal', {thief_id:ME.id, owner_id:currentFarmUserId, plot_index:idx});
+  toast(res.msg, res.ok?'success':'error');
+  if (res.ok) { ME.coins = res.coins; document.getElementById('myCoins').textContent = `💰 ${ME.coins}`; }
+  await loadUsers();
+  await refreshFarm();
+  await loadRank();
+}
+
+// ==================== 排行榜 ====================
+async function loadRank() {
+  const res = await api('/rank');
+  if (!res.ok) return;
+  const list = document.getElementById('rankList');
+  list.innerHTML = res.rank.map((u,i) => {
+    let rankClass = 'rank-other', medal = i+1;
+    if (i===0) { rankClass='rank-1'; medal='🥇'; }
+    else if (i===1) { rankClass='rank-2'; medal='🥈'; }
+    else if (i===2) { rankClass='rank-3'; medal='🥉'; }
+    const isMe = u.id === ME.id ? ' (我)' : '';
+    return `<li>
+      <div class="rank-bar"><span class="rank-num ${rankClass}">${medal}</span> ${u.username}${isMe}</div>
+      <span style="color:#F57C00;font-weight:700">💰${u.coins}</span>
+    </li>`;
+  }).join('');
+}
+
+// ==================== 商店 ====================
+function renderShop() {
+  document.getElementById('shopGrid').innerHTML = Object.entries(CROPS).map(([k,v]) => `
+    <div class="shop-item" onclick="quickPlant('${k}')">
+      <div class="shop-icon">${v.icon}</div>
+      <div class="shop-name">${v.name}</div>
+      <div class="shop-info">🕐${v.grow}秒 | 💰${v.value}</div>
+      <div class="shop-price">种子 💰${v.price}</div>
+    </div>
+  `).join('');
+}
+
+async function quickPlant(cropType) {
+  // 找到第一个空地
+  const res = await api('/farm/' + ME.id);
+  if (!res.ok) return;
+  const emptyIdx = res.plots.findIndex(p => p.state === 'empty');
+  if (emptyIdx === -1) return toast('没有空地了！先收获吧', 'error');
+  plantPlotIndex = emptyIdx;
+  await doPlant(cropType);
+}
+
+// ==================== 启动 ====================
+// 检查是否已登录
+const saved = localStorage.getItem('farm_user');
+if (saved) {
+  const data = JSON.parse(saved);
+  // 尝试用保存的信息登录
+  (async () => {
+    const users = await api('/users');
+    if (users.ok) {
+      const found = users.users.find(u => u.id === data.id);
+      if (found) {
+        // 需要密码，改用登录接口
+        document.getElementById('loginUser').value = data.username;
+        showPage('login');
+      } else {
+        showPage('login');
+      }
+    }
+  })();
+} else {
+  showPage('login');
+}
+
+// 回车登录
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+    doLogin();
+  }
+});
+</script>
+</body>
+</html>
